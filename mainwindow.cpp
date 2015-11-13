@@ -9,12 +9,8 @@
 
 QLineEdit *entries[9][9];
 
-int n=9; //size
+int n=9;
 int cell[9][9];
-int invalid[9][9]={0};
-
-
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,8 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setStyleSheet("background-color: #808080;");
-
-
 
     entries[0][0]=ui->lineEdit_1;
     entries[0][1]=ui->lineEdit_2;
@@ -118,9 +112,10 @@ MainWindow::MainWindow(QWidget *parent) :
     entries[8][8]=ui->lineEdit_81;
 
     int i,j;
+
     black->setColor(QPalette::Text,Qt::black);
-    red->setColor(QPalette::Text,Qt::black);
-    yellow->setColor(QPalette::Text,Qt::black);
+    red->setColor(QPalette::Text,Qt::red);
+    yellow->setColor(QPalette::Text,Qt::yellow);
 
     for(i=0;i<n;i++)
     {
@@ -135,9 +130,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     ui->reset->setStyleSheet("background-color : #FBF6D9;");
-
     ui->solve->setStyleSheet("background-color : #2B65EC;");
-
     ui->exit->setStyleSheet("background-color : #FBF6D9;");
 
 }
@@ -147,7 +140,9 @@ bool checkSafe(int i, int j, int trialNumber)
 {
     if(trialNumber==0) return TRUE;
     if(i>SIZE-1 || j>SIZE-1 || i<0 || j<0) return FALSE;
+
     //box is the sub-grids in which a number cannot be repeated.
+
     int boxCol, boxRow;
     boxCol = ((int)j/3)*3;
     boxRow = ((int)i/3)*3;
@@ -195,6 +190,7 @@ bool findUnassigned(int &row, int &col)
 bool fillSudoku()
 {
     int row, col;
+
     //Check whether grid is filled; if not then return first unassigned value
     if(!findUnassigned(row, col))
     {
@@ -238,8 +234,9 @@ void MainWindow::on_reset_clicked()
            entries[i][j]->setText("");
            entries[i][j]->setValidator( new QIntValidator(1, 9, this) );
            entries[i][j]->setPalette(*black);
-           cell[i][j]=0;
            entries[i][j]->setStyleSheet("font-size : 12pt ;font-weight:600;background-color: #fdeef4 ;");
+           cell[i][j]=0;
+
         }
     }
 
@@ -252,24 +249,25 @@ void MainWindow::on_solve_clicked()
     int flag=0;
     for(i=0;i<n;i++)
     {
-    for(j=0;j<n;j++)
-    {
-        QString str = entries[i][j]->text();
-        int number=str.toInt();
-        if(number==0&&str!="")
+        for(j=0;j<n;j++)
         {
-            red->setColor(QPalette::Text,Qt::black);
-            entries[i][j]->setPalette(*red);
-            flag=1;
-            entries[i][j]->setText("");
+            QString str = entries[i][j]->text();
+            int number=str.toInt();
+            if(number==0&&str!="")
+            {
+                red->setColor(QPalette::Text,Qt::black);
+                entries[i][j]->setPalette(*red);
+                flag=1;
+                entries[i][j]->setText("");
+            }
+            if(number<=9&&number>=1)
+                cell[i][j]=number;
         }
-        if(number<=9&&number>=1)
-            cell[i][j]=number;
-    }
+
     }
 
-if(flag==1) //any value is out of bound
-{
+    if(flag==1) //any value is out of bound
+    {
 
         QMessageBox *message = new QMessageBox();
         message->setWindowTitle("Error");
@@ -279,82 +277,82 @@ if(flag==1) //any value is out of bound
         message->setFocus();
         if(message->exec()==QMessageBox::Ok)
         {
-        black->setColor(QPalette::Text,Qt::black);
+            black->setColor(QPalette::Text,Qt::black);
         }
 
-black->setColor(QPalette::Text,Qt::black);
-flag=0;
-}
+        black->setColor(QPalette::Text,Qt::black);
+        flag=0;
+    }
 
-else // no value is out of bound
-{
-
-    int flag2=0; //  for invalid input
-
-    for(i=0;i<n;i++)
+    else // no value is out of bound
     {
-        for(j=0;j<n;j++)
+
+        int flag2=0; //  for invalid input
+
+        for(i=0;i<n;i++)
         {
-            if(cell[i][j]!=0)
+            for(j=0;j<n;j++)
             {
-                if(checkSafe(i,j,cell[i][j]))
-                    continue;
-                else
+                if(cell[i][j]!=0)
                 {
-                    flag2=1;red->setColor(QPalette::Text,Qt::red);
-                    entries[i][j]->setPalette(*red);
+                    if(checkSafe(i,j,cell[i][j]))
+                        continue;
+                    else
+                    {
+                        flag2=1;red->setColor(QPalette::Text,Qt::red);
+                        entries[i][j]->setPalette(*red);
+                    }
                 }
             }
         }
-    }
 
 
 
-    if(flag2==1) //yes there is invalid input
-    {
-
-    QMessageBox *message = new QMessageBox();
-    message->setWindowTitle("Error");
-    message->setText("Invalid input.");
-    message->setStandardButtons(QMessageBox::Ok);
-    message->setDefaultButton(QMessageBox::Ok);
-    message->setFocus();
-    if(message->exec()==QMessageBox::Ok)
-    {}
-    for(i=0;i<n;i++)
-    {
-        for(j=0;j<n;j++)
+        if(flag2==1) //yes there is invalid input
         {
-        cell[i][j]=0;
-        black->setColor(QPalette::Text,Qt::black);
-        entries[i][j]->setPalette(*black);
+
+            QMessageBox *message = new QMessageBox();
+            message->setWindowTitle("Error");
+            message->setText("Invalid input.");
+            message->setStandardButtons(QMessageBox::Ok);
+            message->setDefaultButton(QMessageBox::Ok);
+            message->setFocus();
+            if(message->exec()==QMessageBox::Ok)
+            {}
+            for(i=0;i<n;i++)
+            {
+                for(j=0;j<n;j++)
+                {
+                cell[i][j]=0;
+                black->setColor(QPalette::Text,Qt::black);
+                entries[i][j]->setPalette(*black);
+                }
+            }
+                flag=0;
         }
-    }
-    flag=0;
-    }
-    else
-    {
-
-    fillSudoku();
-
-yellow->setColor(QPalette::Text,Qt::blue);
-//entries[i][j]->setPalette(*yellow);
-for(i=0;i<n;i++)
-{
-    for(j=0;j<n;j++)
-    {
-        QString str = entries[i][j]->text();
-        int number=str.toInt();
-        if(str=="")
+        else
         {
-            entries[i][j]->setPalette(*yellow);
-            entries[i][j]->setText(QString::number(cell[i][j]));
-        }
-     }
- }
+
+            fillSudoku();
+
+            yellow->setColor(QPalette::Text,Qt::blue);
+            for(i=0;i<n;i++)
+            {
+                for(j=0;j<n;j++)
+                {
+                    QString str = entries[i][j]->text();
+                    int number=str.toInt();
+                    if(str=="")
+                    {
+                        entries[i][j]->setPalette(*yellow);
+                        entries[i][j]->setText(QString::number(cell[i][j]));
+                    }
+                 }
+             }
 
 
-    }
+        } //inner else
 
-}
-}
+    } //else
+
+} //function
