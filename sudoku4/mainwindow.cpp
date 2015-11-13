@@ -227,7 +227,7 @@ void MainWindow::on_reset_clicked()
            entries[i][j]->setText("");
            entries[i][j]->setValidator( new QIntValidator(1, 9, this) );
            entries[i][j]->setPalette(*black);
-
+           cell[i][j]=0;
         }
     }
 }
